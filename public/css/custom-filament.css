@@ -1,0 +1,22 @@
+.filament-sidebar {
+    background-color: #1c1c1e !important;
+}
+
+.filament-main {
+    background-color: #f5f5f7 !important;
+}
+
+.badge-available {
+    background-color: #34c759 !important;
+    color: white !important;
+}
+
+.badge-occupied {
+    background-color: #ff3b30 !important;
+    color: white !important;
+}
+
+.badge-pending {
+    background-color: #ffcc00 !important;
+    color: black !important;
+}
