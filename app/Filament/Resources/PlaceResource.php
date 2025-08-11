@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PlaceResource\Pages;
+use App\Filament\Resources\PlaceResource\RelationManagers\SlotsRelationManager;
 use App\Models\Place;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -117,10 +118,18 @@ class PlaceResource extends Resource
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            SlotsRelationManager::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListPlaces::route('/'),
+            'view' => Pages\ViewPlace::route('/{record}'),
             'create' => Pages\CreatePlace::route('/create'),
             'edit' => Pages\EditPlace::route('/{record}/edit'),
         ];

@@ -4,28 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Place extends Model
+class Slot extends Model
 {
     use HasUuids, SoftDeletes;
 
     protected $guarded = [];
-    protected $casts = [
-        'address' => 'array',
-        'location' => 'array',
-    ];
-
-    /**
-     * Get all of the slots for the Place
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function slots(): HasMany
-    {
-        return $this->hasMany(Slot::class, 'place_id', 'id');
-    }
+    protected $casts = [];
 
     protected static function boot()
     {
