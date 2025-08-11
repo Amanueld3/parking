@@ -26,44 +26,50 @@ class PlaceResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->label('Place Name')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->placeholder('Enter place name'),
 
                 Forms\Components\TextInput::make('capacity')
                     ->numeric()
                     ->nullable()
-                    ->label('Capacity'),
+                    ->label('Capacity')
+                    ->placeholder('e.g. 100'),
 
                 Forms\Components\Fieldset::make('Address')
                     ->schema([
                         Forms\Components\TextInput::make('address.city')
                             ->label('City')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->placeholder('Enter city'),
 
                         Forms\Components\TextInput::make('address.subcity')
                             ->label('Subcity')
                             ->nullable()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->placeholder('Enter subcity'),
 
                         Forms\Components\TextInput::make('address.district')
                             ->label('District')
                             ->nullable()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->placeholder('Enter district'),
                     ])
                     ->columns(3),
-
 
                 Forms\Components\Fieldset::make('Location')
                     ->schema([
                         Forms\Components\TextInput::make('location.lat')
                             ->label('Latitude')
                             ->numeric()
-                            ->nullable(),
+                            ->nullable()
+                            ->placeholder('e.g. 9.005401'),
 
                         Forms\Components\TextInput::make('location.long')
                             ->label('Longitude')
                             ->numeric()
-                            ->nullable(),
+                            ->nullable()
+                            ->placeholder('e.g. 38.763611'),
                     ]),
             ]);
     }
@@ -89,10 +95,6 @@ class PlaceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable(),
             ])
