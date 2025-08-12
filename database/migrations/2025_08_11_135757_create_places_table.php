@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('places', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('created_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('owner_id')->constrained('users')->cascadeOnDelete();
             $table->string('name');
             $table->string('capacity')->nullable();
             $table->json('address')->nullable();

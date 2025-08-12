@@ -10,8 +10,6 @@ use Filament\Resources\Pages\ViewRecord;
 class ViewPlace extends ViewRecord
 {
     protected static string $resource = PlaceResource::class;
-
-
     public static function getRelations(): array
     {
         return [

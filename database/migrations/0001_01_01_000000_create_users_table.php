@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+            $table->string('phone')->unique();
             $table->string('email')->unique();
             $table->timestamp('verified_at')->nullable();
             $table->foreignId('current_team_id')->nullable();

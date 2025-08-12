@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Slot extends Model
@@ -12,6 +13,16 @@ class Slot extends Model
 
     protected $guarded = [];
     protected $casts = [];
+
+    /**
+     * Get the place that owns the Slot
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function place(): BelongsTo
+    {
+        return $this->belongsTo(Place::class, 'place_id', 'id');
+    }
 
     protected static function boot()
     {
