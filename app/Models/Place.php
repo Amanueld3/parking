@@ -29,6 +29,16 @@ class Place extends Model
     }
 
     /**
+     * Get all of the agents for the Place
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function agents(): HasMany
+    {
+        return $this->hasMany(Agent::class, 'place_id', 'id');
+    }
+
+    /**
      * Get the owner that owns the Place
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

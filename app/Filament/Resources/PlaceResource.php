@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PlaceResource\Pages;
+use App\Filament\Resources\PlaceResource\RelationManagers\AgentsRelationManager;
 use App\Filament\Resources\PlaceResource\RelationManagers\SlotsRelationManager;
 use App\Models\Place;
 use Filament\Forms;
@@ -182,6 +183,7 @@ class PlaceResource extends Resource
     public static function getRelations(): array
     {
         return [
+            AgentsRelationManager::class,
             SlotsRelationManager::class,
         ];
     }
