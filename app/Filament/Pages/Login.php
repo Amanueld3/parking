@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Services\OtpService;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
+use Illuminate\Validation\Rule;
 
 class Login extends BaseLogin
 {
@@ -31,15 +32,38 @@ class Login extends BaseLogin
         return $form
             ->schema([
                 TextInput::make('phone')
-                    ->label('Phone Number')
+                    ->label('Phone')
                     ->required()
-                    ->tel()
-                    ->numeric(),
+                    ->prefix('+251')
+                    ->placeholder('9XXXXXXXX')
+                    ->mask(fn() => '999999999')
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $cleaned = preg_replace('/\D/', '', $state);
+
+                        if ($cleaned !== '' && $cleaned[0] !== '9') {
+                            $cleaned = '9' . substr($cleaned, 0, 8);
+                        }
+
+                        if (strlen($cleaned) > 9) {
+                            $cleaned = substr($cleaned, -9);
+                        }
+
+                        $set('owner_phone', $cleaned);
+                    })
+                    ->dehydrateStateUsing(function ($state) {
+                        return $state;
+                    })
+                    ->disabled(fn($get) => $get('otpSent'))
+                    ->dehydrated(true),
 
                 TextInput::make('otp')
                     ->label('OTP')
                     ->numeric()
                     ->required()
+                    ->placeholder('******')
+                    ->mask(fn() => '999999')
+                    ->rule('digits:6')
                     ->hidden(fn($get) => !$get('otpSent')),
             ])
             ->statePath('data');
@@ -52,16 +76,33 @@ class Login extends BaseLogin
         ]);
 
         $phone = $this->data['phone'];
-        app(OtpService::class)->sendOtp($phone);
+        try {
+            $result = app(OtpService::class)->sendOtp($phone);
 
-        $this->form->fill([
-            'otpSent' => true,
-        ]);
+            if (!$result) {
+                Notification::make()
+                    ->title('Failed to send OTP. Please try again.')
+                    ->danger()
+                    ->send();
+                return;
+            }
 
-        Notification::make()
-            ->title('OTP sent to your phone.')
-            ->success()
-            ->send();
+            $this->form->fill([
+                'phone' => $phone, // Keep the phone number
+                'otpSent' => true,
+            ]);
+
+            Notification::make()
+                ->title('OTP sent to your phone.')
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Failed to send OTP. Please try again.')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 
     public function authenticate(): ?LoginResponse

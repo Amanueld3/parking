@@ -14,6 +14,8 @@ use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class PlaceResource extends Resource
 {
@@ -89,35 +91,48 @@ class PlaceResource extends Resource
                             ->prefix('+251')
                             ->placeholder('9XXXXXXXX')
                             ->mask(fn() => '999999999')
-                            ->unique(table: 'users', column: 'phone')
                             ->live(onBlur: true)
-                            ->dehydrateStateUsing(function ($state) {
-                                if (preg_match('/^9\d{8}$/', $state)) {
-                                    return substr($state, 1);
+                            ->rules([
+                                'regex:/^9\d{8}$/',
+                                function ($record) {
+                                    return Rule::unique('users', 'phone')
+                                        ->ignore($record?->owner?->id);
                                 }
-                                return $state;
-                            }),
+                            ])
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Remove any non-numeric characters
+                                $cleaned = preg_replace('/\D/', '', $state);
 
+                                // Ensure starts with 9
+                                if ($cleaned !== '' && $cleaned[0] !== '9') {
+                                    $cleaned = '9' . substr($cleaned, 0, 8);
+                                }
+
+                                // If length > 9, remove from the front
+                                if (strlen($cleaned) > 9) {
+                                    $cleaned = substr($cleaned, -9);
+                                }
+
+                                $set('owner_phone', $cleaned);
+                            })
+                            ->dehydrateStateUsing(function ($state) {
+                                return $state; // Keep as is, since prefix is only visual
+                            }),
 
                         Forms\Components\TextInput::make('owner_email')
                             ->label('Email')
                             ->email()
-                            ->unique(table: 'users', column: 'email')
+                            ->rules([
+                                function ($record) {
+                                    return Rule::unique('users', 'email')
+                                        ->whereNot('id', $record?->owner?->id);
+                                }
+                            ])
                             ->required(),
 
-                        Forms\Components\TextInput::make('owner_password')
-                            ->label('Password')
-                            ->password()
-                            ->required(fn($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord)
-                            ->minLength(8)
-                            ->revealable(),
-
-                        Forms\Components\TextInput::make('owner_password_confirmation')
-                            ->label('Confirm Password')
-                            ->password()
-                            ->required(fn($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord)
-                            ->same('owner_password')
-                            ->revealable(),
+                        Forms\Components\Hidden::make('owner_password')
+                            ->default('password1234')
+                            ->dehydrateStateUsing(fn($state) => Hash::make($state)),
                     ])
                     ->columns(3),
 
