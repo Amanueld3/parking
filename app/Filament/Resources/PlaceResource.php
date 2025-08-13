@@ -24,7 +24,7 @@ class PlaceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
     protected static ?string $modelLabel = 'Place';
 
-    protected static ?string $navigationGroup = 'Setups';
+    // protected static ?string $navigationGroup = 'Setups';
 
     public static function form(Form $form): Form
     {
@@ -35,12 +35,6 @@ class PlaceResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->placeholder('Enter place name'),
-
-                Forms\Components\TextInput::make('capacity')
-                    ->numeric()
-                    ->nullable()
-                    ->label('Capacity')
-                    ->placeholder('e.g. 100'),
 
                 Forms\Components\Fieldset::make('Address')
                     ->schema([
@@ -148,7 +142,9 @@ class PlaceResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('capacity')
+                Tables\Columns\TextColumn::make('slots_count')
+                    ->label('Slots')
+                    ->counts('slots')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('owner.name')
                     ->label('Owner Name')
@@ -220,8 +216,6 @@ class PlaceResource extends Resource
                     ->schema([
                         TextEntry::make('name')
                             ->label('Place Name'),
-                        TextEntry::make('capacity')
-                            ->label('Capacity'),
                         TextEntry::make('address.city')
                             ->label('City'),
                         TextEntry::make('address.subcity')

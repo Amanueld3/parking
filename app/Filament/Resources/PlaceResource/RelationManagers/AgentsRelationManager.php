@@ -63,12 +63,14 @@ class AgentsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('user.phone')
                     ->label('Phone'),
                 Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
                     ->badge()
                     ->color(fn(int $state): string => match ($state) {
                         0 => 'danger',
                         1 => 'success',
                         default => 'gray',
-                    }),
+                    })
+                    ->formatStateUsing(fn($state) => $state === 1 ? 'Active' : 'Inactive'),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
