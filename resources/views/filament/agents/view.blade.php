@@ -37,7 +37,7 @@
                 Phone
             </label>
             <div class="p-2 mt-1 text-sm text-gray-900 rounded-lg dark:text-gray-100 bg-gray-50 dark:bg-gray-800">
-                {{ $user->phone ?: 'N/A' }}
+                +251{{ $user->phone ?: 'N/A' }}
             </div>
         </div>
 

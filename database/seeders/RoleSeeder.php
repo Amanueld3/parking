@@ -43,6 +43,14 @@ class RoleSeeder extends Seeder
 
 
         $owner = Role::firstOrCreate(['name' => 'owner']);
+        $owner->permissions()->detach();
+        $ownerPermissions = [];
+        foreach ($permissionPrefixes as $prefix) {
+            $ownerPermissions[] = "{$prefix}place";
+            $ownerPermissions[] = "{$prefix}slot";
+        }
+        $owner->givePermissionTo($ownerPermissions);
+
         $agent = Role::firstOrCreate(['name' => 'agent']);
     }
 }

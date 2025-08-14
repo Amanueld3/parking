@@ -11,6 +11,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AgentsRelationManager extends RelationManager
 {
@@ -31,11 +32,29 @@ class AgentsRelationManager extends RelationManager
                             ->required()
                             ->prefix('+251')
                             ->placeholder('9XXXXXXXX')
-                            ->mask('999999999')
-                            ->unique(table: 'users', column: 'phone', ignoreRecord: true)
+                            ->mask(fn() => '999999999')
                             ->live(onBlur: true)
+                            ->rules([
+                                'regex:/^9\d{8}$/',
+                                function ($record) {
+                                    return Rule::unique('users', 'phone')
+                                        ->ignore($record?->id);
+                                }
+                            ])
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $cleaned = preg_replace('/\D/', '', $state);
+
+                                if ($cleaned !== '' && $cleaned[0] !== '9') {
+                                    $cleaned = '9' . substr($cleaned, 0, 8);
+                                }
+                                if (strlen($cleaned) > 9) {
+                                    $cleaned = substr($cleaned, -9);
+                                }
+
+                                $set('phone', $cleaned);
+                            })
                             ->dehydrateStateUsing(function ($state) {
-                                return preg_match('/^9\d{8}$/', $state) ? substr($state, 1) : $state;
+                                return $state;
                             }),
 
                         Forms\Components\TextInput::make('email')

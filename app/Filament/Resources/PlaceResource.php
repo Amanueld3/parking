@@ -6,6 +6,7 @@ use App\Filament\Resources\PlaceResource\Pages;
 use App\Filament\Resources\PlaceResource\RelationManagers\AgentsRelationManager;
 use App\Filament\Resources\PlaceResource\RelationManagers\SlotsRelationManager;
 use App\Models\Place;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -17,6 +18,8 @@ use Filament\Infolists\Components\TextEntry;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Filament\Forms\Get;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PlaceResource extends Resource
 {
@@ -319,5 +322,17 @@ class PlaceResource extends Resource
                     ])
                     ->columns(2),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $user = User::find(auth()->id());
+
+        if ($user->hasRole('super_admin')) {
+            return parent::getEloquentQuery();
+        } else {
+            return parent::getEloquentQuery()
+                ->where('owner_id', $user->id);
+        }
     }
 }

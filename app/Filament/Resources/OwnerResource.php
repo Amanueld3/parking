@@ -74,7 +74,7 @@ class OwnerResource extends Resource
                             $cleaned = substr($cleaned, -9);
                         }
 
-                        $set('owner_phone', $cleaned);
+                        $set('phone', $cleaned);
                     })
                     ->dehydrateStateUsing(function ($state) {
                         return $state;
