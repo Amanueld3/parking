@@ -25,6 +25,8 @@ class CreatePlace extends CreateRecord
             'password' => bcrypt($data['owner_password']),
         ]);
 
+        $user->assignRole('owner');
+
         $data['owner_id'] = $user->id;
 
         unset(

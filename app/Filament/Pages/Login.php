@@ -10,7 +10,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Services\OtpService;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
-use Illuminate\Validation\Rule;
 
 class Login extends BaseLogin
 {

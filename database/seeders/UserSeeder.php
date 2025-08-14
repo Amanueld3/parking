@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
             $superadmin = User::factory()->create([
                 'name' => 'Super Admin',
                 'email' => 'superadmin@admin.com',
-                'phone' => '251763732919',
+                'phone' => '963732919',
                 'password' => bcrypt('password'),
             ]);
         }

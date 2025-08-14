@@ -35,11 +35,13 @@ class RoleSeeder extends Seeder
             if (Permission::where('name', "{$prefix}role")->exists()) {
                 $superAdminPermissions[] = "{$prefix}role";
             }
-            $superAdminPermissions[] = "{$prefix}user";
+            $superAdminPermissions[] = "{$prefix}owner";
+            $superAdminPermissions[] = "{$prefix}place";
         }
         $superAdmin->givePermissionTo($superAdminPermissions);
 
 
-        $userRole = Role::firstOrCreate(['name' => 'User']);
+        $owner = Role::firstOrCreate(['name' => 'owner']);
+        $agent = Role::firstOrCreate(['name' => 'agent']);
     }
 }
