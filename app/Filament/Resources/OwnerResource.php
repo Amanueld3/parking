@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OwnerResource\Pages;
 use App\Filament\Resources\OwnerResource\RelationManagers;
+use App\Filament\Resources\OwnerResource\RelationManagers\PlacesRelationManager;
 use App\Models\Owner;
 use App\Models\User;
 use Filament\Forms;
@@ -136,7 +137,7 @@ class OwnerResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            PlacesRelationManager::class,
         ];
     }
 

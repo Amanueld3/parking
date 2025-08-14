@@ -37,6 +37,7 @@ class RoleSeeder extends Seeder
             }
             $superAdminPermissions[] = "{$prefix}owner";
             $superAdminPermissions[] = "{$prefix}place";
+            $superAdminPermissions[] = "{$prefix}slot";
         }
         $superAdmin->givePermissionTo($superAdminPermissions);
 
