@@ -32,12 +32,10 @@ class ListVehicles extends ListRecords
                         $plate = (string) ($record->plate_number ?? '');
                         $ownerName = trim((string) ($record->owner_name ?? ''));
 
-                        // Time
                         $tz = (string) Config::get('app.timezone', 'UTC');
                         $checkinAt = $record->checkin_time ?? $record->created_at;
                         $timeText = optional($checkinAt)->setTimezone($tz)?->format('Y-m-d H:i');
 
-                        // Place + message
                         $placeName = $record->place?->name;
                         $placeText = $placeName ? " at {$placeName}" : '';
                         $base = $ownerName !== ''
@@ -45,7 +43,6 @@ class ListVehicles extends ListRecords
                             : "Your vehicle ({$plate}) has been registered for parking{$placeText}.";
                         $message = $timeText ? ($base . " Checkin time: {$timeText}.") : $base;
 
-                        // Send SMS via trait (no logs)
                         $this->sendSms($ownerPhone, $message);
                     } catch (\Throwable $e) {
                         return; // silent
