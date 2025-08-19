@@ -58,9 +58,10 @@ class RoleSeeder extends Seeder
         //     $agentPermissions[] = "{$prefix}place";
         //     $agentPermissions[] = "{$prefix}slot";
         // }
-        $agentPermissions[] = 'view_vehicle';
-        $agentPermissions[] = 'view_any_vehicle';
+        $agentPermissions[] = 'page_CheckoutParking';
+        $agentPermissions[] = 'page_ParkingDesk';
         $agentPermissions[] = 'create_vehicle';
+        $agentPermissions[] = 'view_any_vehicle';
         $agent->givePermissionTo($agentPermissions);
     }
 }

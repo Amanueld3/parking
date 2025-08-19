@@ -3,11 +3,13 @@
     @unless ($hideButtons)
         <div class="space-y-6">
             <div class="flex flex-wrap items-center justify-center gap-3">
-                <a href="{{ \App\Filament\Resources\VehicleResource::getUrl('create') }}">
-                    <x-filament::button color="primary" icon="heroicon-o-plus" tag="span">
-                        New Vehicle
-                    </x-filament::button>
-                </a>
+                @can('create', \App\Models\Vehicle::class)
+                    <a href="{{ \App\Filament\Resources\VehicleResource::getUrl('create') }}">
+                        <x-filament::button color="primary" icon="heroicon-o-plus" tag="span">
+                            New Vehicle
+                        </x-filament::button>
+                    </a>
+                @endcan
                 <a href="{{ \App\Filament\Pages\CheckoutParking::getUrl() }}">
                     <x-filament::button color="success" icon="heroicon-o-magnifying-glass" tag="span">
                         Checkout Parking

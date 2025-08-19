@@ -24,4 +24,9 @@ class CreateVehicle extends CreateRecord
 
         return $data;
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return url('admin/parking-desk');
+    }
 }
