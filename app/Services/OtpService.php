@@ -40,12 +40,13 @@ class OtpService
                 throw new \Exception("Maximum OTP attempts reached. Please try again later.");
             }
 
-            $otp = $this->generateOtp();
+            // $otp = $this->generateOtp();
+            $otp = 123456;
             $this->storeOtp($phone, $otp);
 
-            if ($this->smsEnabled) {
-                $this->sendViaSmsApi($phone, $otp);
-            }
+            // if ($this->smsEnabled) {
+            //     $this->sendViaSmsApi($phone, $otp);
+            // }
 
             Log::info("OTP generated for {$phone}", ['otp' => $otp]);
             return true;

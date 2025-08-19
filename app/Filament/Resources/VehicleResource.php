@@ -182,8 +182,7 @@ class VehicleResource extends Resource
     {
         return [
             'index' => Pages\ListVehicles::route('/'),
-            // Removed the dedicated create page to use modal creation on index instead
-            // 'create' => Pages\CreateVehicle::route('/create'),
+            'create' => Pages\CreateVehicle::route('/create'),
             'edit' => Pages\EditVehicle::route('/{record}/edit'),
         ];
     }

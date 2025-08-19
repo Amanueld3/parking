@@ -52,5 +52,15 @@ class RoleSeeder extends Seeder
         $owner->givePermissionTo($ownerPermissions);
 
         $agent = Role::firstOrCreate(['name' => 'agent']);
+        $agent->permissions()->detach();
+        $agentPermissions = [];
+        // foreach ($permissionPrefixes as $prefix) {
+        //     $agentPermissions[] = "{$prefix}place";
+        //     $agentPermissions[] = "{$prefix}slot";
+        // }
+        $agentPermissions[] = 'view_vehicle';
+        $agentPermissions[] = 'view_any_vehicle';
+        $agentPermissions[] = 'create_vehicle';
+        $agent->givePermissionTo($agentPermissions);
     }
 }

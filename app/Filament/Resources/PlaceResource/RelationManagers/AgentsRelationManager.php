@@ -101,6 +101,8 @@ class AgentsRelationManager extends RelationManager
                             'password' => $data['password'],
                         ]);
 
+                        $user->assignRole('agent');
+
                         return $model::create([
                             'place_id' => $this->getOwnerRecord()->id,
                             'user_id' => $user->id,
