@@ -2,6 +2,13 @@
     $rows = $vehicles instanceof \Illuminate\Support\Collection ? $vehicles : collect($vehicles);
 @endphp
 
+@if (session('error'))
+    <div class="p-3 text-sm text-red-800 bg-red-100 border border-red-200 rounded">{{ session('error') }}</div>
+@endif
+@if (session('success'))
+    <div class="p-3 text-sm text-green-800 bg-green-100 border border-green-200 rounded">{{ session('success') }}</div>
+@endif
+
 @if ($rows->isEmpty())
     <div class="text-sm text-gray-500 dark:text-gray-400">No results. Start typing to search…</div>
 @else
@@ -36,10 +43,14 @@
                         </div>
                     </div>
                     <div class="shrink-0">
-                        <x-filament::button color="success" size="sm"
-                            wire:click="checkoutVehicle('{{ $v->id }}')">
-                            Checkout
-                        </x-filament::button>
+                        <form method="POST" action="{{ route('payments.start', ['vehicle' => $v->id]) }}">
+                            @csrf
+                            <input type="hidden" name="amount" value="10" />
+                            <button type="submit"
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600">
+                                Pay & Checkout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
