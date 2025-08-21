@@ -3,10 +3,16 @@
 @endphp
 
 @if (session('error'))
-    <div class="p-3 text-sm text-red-800 bg-red-100 border border-red-200 rounded">{{ session('error') }}</div>
+    <div
+        class="px-3 py-2 mb-3 text-sm border rounded-lg border-danger-300 bg-danger-50 text-danger-800 dark:border-danger-900/50 dark:bg-danger-900/20 dark:text-danger-300">
+        {{ session('error') }}
+    </div>
 @endif
 @if (session('success'))
-    <div class="p-3 text-sm text-green-800 bg-green-100 border border-green-200 rounded">{{ session('success') }}</div>
+    <div
+        class="px-3 py-2 mb-3 text-sm border rounded-lg border-success-300 bg-success-50 text-success-800 dark:border-success-900/50 dark:bg-success-900/20 dark:text-success-300">
+        {{ session('success') }}
+    </div>
 @endif
 
 @if ($rows->isEmpty())
@@ -17,27 +23,42 @@
         @foreach ($rows as $v)
             <div class="p-3 bg-white border border-gray-200 rounded-lg dark:border-gray-700 dark:bg-gray-900">
                 <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <div class="text-base font-semibold text-gray-900 dark:text-gray-100">
-                            {{ $v->plate_number }}
+                    <div class="flex items-start gap-3">
+                        <div
+                            class="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-sm font-semibold font-mono tracking-wider text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            {{ strtoupper($v->plate_number) }}
                         </div>
-                        <div class="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                            <div>
-                                <span class="font-medium text-gray-700 dark:text-gray-200">Owner:</span>
-                                {{ $v->owner_name ?: '-' }}
-                            </div>
-                            <div>
-                                <span class="font-medium text-gray-700 dark:text-gray-200">Phone:</span>
-                                {{ $v->owner_phone ? '+251' . $v->owner_phone : '-' }}
-                            </div>
-                            <div class="flex flex-wrap mt-1 gap-x-4 gap-y-1">
-                                <div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-200">Place:</span>
-                                    {{ $v->place?->name ?: '-' }}
+
+                        <div class="min-w-0">
+                            <div class="space-y-1 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <x-heroicon-o-user class="w-4 h-4 text-gray-400" />
+                                    <span class="text-gray-600 whitespace-nowrap dark:text-gray-400">Owner</span>
+                                    <span
+                                        class="font-medium text-gray-900 dark:text-gray-100">{{ $v->owner_name ?: '-' }}</span>
                                 </div>
-                                <div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-200">Check-in:</span>
-                                    {{ $v->checkin_time ? \Illuminate\Support\Carbon::parse($v->checkin_time)->timezone(config('app.timezone'))->format('Y-m-d H:i') : '-' }}
+
+                                <div class="flex items-center gap-2">
+                                    <x-heroicon-o-phone class="w-4 h-4 text-gray-400" />
+                                    <span class="text-gray-600 whitespace-nowrap dark:text-gray-400">Phone</span>
+                                    <span
+                                        class="font-medium text-gray-900 dark:text-gray-100">{{ $v->owner_phone ? '+251' . $v->owner_phone : '-' }}</span>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-x-6 gap-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <x-heroicon-o-map-pin class="w-4 h-4 text-gray-400" />
+                                        <span class="text-gray-600 whitespace-nowrap dark:text-gray-400">Place</span>
+                                        <span
+                                            class="font-medium text-gray-900 dark:text-gray-100">{{ $v->place?->name ?: '-' }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <x-heroicon-o-clock class="w-4 h-4 text-gray-400" />
+                                        <span class="text-gray-600 whitespace-nowrap dark:text-gray-400">Check-in</span>
+                                        <span class="font-medium text-gray-900 dark:text-gray-100">
+                                            {{ $v->checkin_time ? \Illuminate\Support\Carbon::parse($v->checkin_time)->timezone(config('app.timezone'))->format('Y-m-d H:i') : '-' }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -47,8 +68,9 @@
                             @csrf
                             <input type="hidden" name="amount" value="10" />
                             <button type="submit"
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600">
-                                Pay & Checkout
+                                class="fi-btn relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm outline-none ring-1 ring-primary-600/20 transition hover:bg-primary-500 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-primary-600 dark:hover:bg-primary-500">
+                                <x-heroicon-o-credit-card class="w-4 h-4" />
+                                <span>Pay & Checkout</span>
                             </button>
                         </form>
                     </div>
