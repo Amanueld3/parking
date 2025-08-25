@@ -24,6 +24,14 @@ class Vehicle extends Model
         return $this->belongsTo(Place::class, 'place_id', 'id');
     }
 
+    /**
+     * User (agent) who created the vehicle check-in
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
     protected static function boot()
     {
         parent::boot();
