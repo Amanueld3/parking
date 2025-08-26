@@ -87,18 +87,29 @@ class VehicleResource extends Resource
                 Tables\Columns\TextColumn::make('duration')
                     ->label('Duration')
                     ->state(function ($record) {
+                        if (!$record->checkout_time) {
+                            return '-';
+                        }
                         $start = $record->checkin_time ? Carbon::parse($record->checkin_time) : null;
-                        $end = $record->checkout_time ? Carbon::parse($record->checkout_time) : now();
+                        $end = Carbon::parse($record->checkout_time);
                         if (!$start) {
                             return '-';
                         }
                         $minutes = $start->diffInMinutes($end);
                         if ($minutes < 60) {
-                            return $minutes . ' min';
+                            return round($minutes, 1) . ' min';
                         }
                         $hours = round($minutes / 60, 1);
                         return $hours . ' hr';
-                    }),
+                    })
+                    ->color(function ($record) {
+                        if (!$record->checkout_time || !$record->checkin_time) {
+                            return null;
+                        }
+                        return 'success';
+                    })
+                    ->formatStateUsing(fn($state) => "<strong>{$state}</strong>")
+                    ->html(),
                 Tables\Columns\TextColumn::make('owner_name')
                     ->searchable()
                     ->sortable(),
@@ -129,20 +140,22 @@ class VehicleResource extends Resource
                         $record->checkout_time = now();
                         $record->save();
 
-                        // Build checkout SMS message (no logging)
-                        $tz = config('app.timezone', 'UTC');
-                        $checkoutAt = $record->checkout_time;
-                        $timeText = optional($checkoutAt)->setTimezone($tz)?->format('Y-m-d H:i');
-                        $placeName = $record->place?->name;
-                        $placeText = $placeName ? " at {$placeName}" : '';
-                        $ownerName = trim((string) ($record->owner_name ?? ''));
+                        $checkoutAt = $record->checkout_time
+                            ? $record->checkout_time->format('Y-m-d h:i A')
+                            : null;
+
+                        $placeText = $record->place?->name ? " at {$record->place->name}" : '';
+                        $ownerName = trim($record->owner_name ?? '');
                         $plate = (string) ($record->plate_number ?? '');
-                        $base = $ownerName !== ''
+
+                        $baseMessage = $ownerName
                             ? "Hello {$ownerName}, your vehicle ({$plate}) has been checked out from parking{$placeText}."
                             : "Your vehicle ({$plate}) has been checked out from parking{$placeText}.";
-                        $message = $timeText ? ($base . " Checkout time: {$timeText}.") : $base;
 
-                        // Send via SendsSms trait using anonymous helper (static context safe)
+                        $message = $checkoutAt
+                            ? "{$baseMessage} Checkout time: {$checkoutAt}."
+                            : $baseMessage;
+
                         $sender = new class {
                             use \App\Traits\SendsSms;
                             public function sendNow(string $phone, string $message): bool
@@ -150,14 +163,16 @@ class VehicleResource extends Resource
                                 return $this->sendSms($phone, $message);
                             }
                         };
+
                         $sender->sendNow((string) ($record->owner_phone ?? ''), $message);
 
                         Notification::make()
-                            ->title("{$record->plate_number} has been marked as checked out.")
+                            ->title("{$plate} has been marked as checked out.")
                             ->seconds(5)
                             ->success()
                             ->send();
-                    }),
+                    })
+
                 // Tables\Actions\ActionGroup::make([
                 //     Tables\Actions\EditAction::make(),
                 //     Tables\Actions\ViewAction::make(),

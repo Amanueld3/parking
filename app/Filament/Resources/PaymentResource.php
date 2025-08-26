@@ -19,11 +19,11 @@ class PaymentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
     protected static ?string $navigationLabel = 'Transactions';
-    protected static ?string $modelLabel = 'Transaction';
+    // protected static ?string $modelLabel = 'Transaction';
 
     public static function form(Form $form): Form
     {
-        return $form->schema([]); // Read-only listing for now
+        return $form->schema([]);
     }
 
     public static function table(Table $table): Table
@@ -45,15 +45,15 @@ class PaymentResource extends Resource
                     ->label('Amount')
                     ->sortable()
                     ->formatStateUsing(fn($state) => 'ETB ' . number_format((float) $state, 2)),
-
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->colors([
-                        'warning' => 'initialized',
-                        'info' => 'pending',
+                    ->color(fn(string $state): string => match ($state) {
+                        'initialized' => 'primary',
+                        'pending' => 'warning',
                         'success' => 'success',
-                        'danger' => ['failed', 'cancelled'],
-                    ])
+                        'failed', 'cancelled' => 'danger',
+                        default => 'gray',
+                    })
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('vehicle.place.name')
@@ -143,7 +143,13 @@ class PaymentResource extends Resource
             return $base;
         }
 
-        // Owner: only payments for vehicles in their places
+        if ($user && $user->hasRole('agent')) {
+            return $base->whereHas('vehicle', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            });
+        }
+
+        // Owner: show payments for places they own
         return $base->whereHas('vehicle.place', function ($q) use ($user) {
             $q->where('owner_id', $user?->id);
         });
@@ -151,8 +157,10 @@ class PaymentResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        $user = auth()->user();
-        if (! $user) return false;
-        return $user->hasRole('super_admin') || $user->hasRole('owner');
+        // $user = auth()->user();
+        // if (! $user) return false;
+        // return $user->hasRole('super_admin') || $user->hasRole('owner');
+
+        return true;
     }
 }

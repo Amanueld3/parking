@@ -22,7 +22,6 @@
         </div>
     @endunless
 
-    <!-- New Vehicle Modal -->
     <x-filament::modal :visible="$showNew" width="2xl" close-by-clicking-away="true"
         x-on:close-modal.window="$wire.closeNewVehicle()">
         <x-slot name="heading">New Vehicle Check-in</x-slot>
@@ -73,7 +72,14 @@
     <!-- Checkout: modal or inline -->
     @if ($inlineCheckout)
         <div class="mt-8">
-            <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100">Checkout Vehicle</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Checkout Vehicle</h2>
+                <a href="/admin/parking-desk">
+                    <x-filament::button color="gray" icon="heroicon-o-arrow-left">
+                        Back
+                    </x-filament::button>
+                </a>
+            </div>
             <div class="space-y-4">
                 <div>
                     <label for="query" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Search by

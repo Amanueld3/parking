@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Vehicle;
 use App\Services\ChapaService;
+use Filament\Notifications\Notification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -120,7 +121,6 @@ class PaymentController extends Controller
             return redirect()->route('filament.pages.checkout')->with('error', 'Payment not found.');
         }
 
-        // Always verify again on return to be safe
         $chapa = ChapaService::make();
         $verification = $chapa->verify($txRef);
         $ok = $verification['ok'] && ($verification['body']['status'] ?? '') === 'success' && (($verification['body']['data']['status'] ?? '') === 'success');
@@ -136,6 +136,8 @@ class PaymentController extends Controller
                 $vehicle->checkout_time = now();
                 $vehicle->save();
             }
+
+            $this->checkoutNotification($vehicle);
             return redirect()->route('filament.pages.checkout')->with('success', 'Payment successful and checkout completed.');
         }
 
@@ -144,5 +146,40 @@ class PaymentController extends Controller
             'status' => 'failed',
         ]);
         return redirect()->route('filament.pages.checkout')->with('error', 'Payment failed or not verified.');
+    }
+
+    private function checkoutNotification($record)
+    {
+        $checkoutAt = $record->checkout_time
+            ? $record->checkout_time->format('Y-m-d h:i A')
+            : null;
+
+        $placeText = $record->place?->name ? " at {$record->place->name}" : '';
+        $ownerName = trim($record->owner_name ?? '');
+        $plate = (string) ($record->plate_number ?? '');
+
+        $baseMessage = $ownerName
+            ? "Hello {$ownerName}, your vehicle ({$plate}) has been checked out from parking{$placeText}."
+            : "Your vehicle ({$plate}) has been checked out from parking{$placeText}.";
+
+        $message = $checkoutAt
+            ? "{$baseMessage} Checkout time: {$checkoutAt}."
+            : $baseMessage;
+
+        $sender = new class {
+            use \App\Traits\SendsSms;
+            public function sendNow(string $phone, string $message): bool
+            {
+                return $this->sendSms($phone, $message);
+            }
+        };
+
+        $sender->sendNow((string) ($record->owner_phone ?? ''), $message);
+
+        Notification::make()
+            ->title("{$plate} has been marked as checked out.")
+            ->seconds(5)
+            ->success()
+            ->send();
     }
 }
