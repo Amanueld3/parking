@@ -23,6 +23,23 @@ class CreateVehicle extends CreateRecord
             $data['place_id'] = $agent->place_id;
         }
 
+        // Build the plate number from structured inputs
+        $region = (string) ($data['region_code'] ?? '');
+        $code = (string) ($data['code'] ?? '');
+        $series = strtoupper((string) ($data['series'] ?? ''));
+        $number = preg_replace('/\D/', '', (string) ($data['number'] ?? ''));
+
+        if ($region && $code && $number) {
+            $number = str_pad(substr($number, 0, 5), 5, '0', STR_PAD_LEFT);
+            if ($series !== '' && $series !== null) {
+                $data['plate_number'] = sprintf('%s-%s-%s-%s', $region, $code, $series, $number);
+            } else {
+                $data['plate_number'] = sprintf('%s-%s-%s', $region, $code, $number);
+            }
+        }
+
+        unset($data['region_code'], $data['code'], $data['series'], $data['number']);
+
         return $data;
     }
 

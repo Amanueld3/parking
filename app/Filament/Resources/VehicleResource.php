@@ -36,35 +36,92 @@ class VehicleResource extends Resource
                     ->dehydrated() // ensure it's saved
                     ->required(),
 
+                // License plate structured inputs (create only)
+                Forms\Components\Fieldset::make('License Plate')
+                    ->schema([
+                        Forms\Components\Select::make('region_code')
+                            ->label('Region')
+                            ->options([
+                                'ET' => 'ኢት / ET',
+                                'AA' => 'አአ / AA',
+                                'AF' => 'አፋ / AF',
+                                'AM' => 'አማ / AM',
+                                'BG' => 'ቤጉ / BG',
+                                'DR' => 'ድሬ / DR',
+                                'GM' => 'ጋም / GM',
+                                'HR' => 'ሐረ / HR',
+                                'OR' => 'ኦሮ / OR',
+                                'SM' => 'ሶማ / SM',
+                            ])
+                            ->searchable()
+                            ->default('AA')
+                            ->required(),
+                        Forms\Components\Select::make('code')
+                            ->label('Code')
+                            ->options(
+                                collect(range(1, 10))
+                                    ->mapWithKeys(fn($n) => [(string) $n => (string) $n])
+                                    ->toArray()
+                            )
+                            ->required(),
+                        Forms\Components\Select::make('series')
+                            ->label('Prefix')
+                            ->options([
+                                '' => 'None',
+                                'A' => 'A',
+                                'B' => 'B',
+                                'C' => 'C',
+                            ])
+                            ->default('')
+                            ->nullable(),
+                        Forms\Components\TextInput::make('number')
+                            ->label('Number (5 digits)')
+                            ->mask(fn() => '99999')
+                            ->required()
+                            ->rule('digits:5')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $digits = preg_replace('/\D/', '', (string) $state);
+                                $set('number', substr($digits, 0, 5));
+                            }),
+                    ])
+                    ->columns(4)
+                    ->visibleOn('create'),
+                // Show existing plate on edit
                 Forms\Components\TextInput::make('plate_number')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('owner_name')
-                    ->label('Full Name')
-                    ->nullable()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('owner_phone')
-                    ->label('Phone')
-                    ->required()
-                    ->prefix('+251')
-                    ->placeholder('9XXXXXXXX')
-                    ->mask(fn() => '999999999')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        $cleaned = preg_replace('/\D/', '', $state);
+                    ->label('Plate Number')
+                    ->disabled()
+                    ->visibleOn('edit'),
+                Forms\Components\Fieldset::make('Owner')
+                    ->schema([
+                        Forms\Components\TextInput::make('owner_phone')
+                            ->label('Phone')
+                            ->required()
+                            ->prefix('+251')
+                            ->placeholder('9XXXXXXXX')
+                            ->mask(fn() => '999999999')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $cleaned = preg_replace('/\D/', '', $state);
 
-                        if ($cleaned !== '' && $cleaned[0] !== '9') {
-                            $cleaned = '9' . substr($cleaned, 0, 8);
-                        }
-                        if (strlen($cleaned) > 9) {
-                            $cleaned = substr($cleaned, -9);
-                        }
+                                if ($cleaned !== '' && $cleaned[0] !== '9') {
+                                    $cleaned = '9' . substr($cleaned, 0, 8);
+                                }
+                                if (strlen($cleaned) > 9) {
+                                    $cleaned = substr($cleaned, -9);
+                                }
 
-                        $set('owner_phone', $cleaned);
-                    })
-                    ->dehydrateStateUsing(function ($state) {
-                        return $state;
-                    }),
+                                $set('owner_phone', $cleaned);
+                            })
+                            ->dehydrateStateUsing(function ($state) {
+                                return $state;
+                            }),
+                        Forms\Components\TextInput::make('owner_name')
+                            ->label('Full Name (optional)')
+                            ->nullable()
+                            ->maxLength(255),
+                    ])
+                    ->columns(2),
             ])->columns(1);
     }
 
@@ -120,7 +177,7 @@ class VehicleResource extends Resource
                     ->label('Place')
                     ->searchable()
                     ->sortable(),
-            ])->defaultSort('checkout_time', 'asc')
+            ])->defaultSort('checkin_time', 'desc')
             ->filters([
                 //
             ])
