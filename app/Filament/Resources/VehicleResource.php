@@ -191,21 +191,10 @@ class VehicleResource extends Resource
                         $record->checkout_time = now();
                         $record->save();
 
-                        $checkoutAt = $record->checkout_time
-                            ? $record->checkout_time->format('Y-m-d h:i A')
-                            : null;
-
-                        $placeText = $record->place?->name ? " at {$record->place->name}" : '';
-                        $ownerName = trim($record->owner_name ?? '');
-                        $plate = (string) ($record->plate_number ?? '');
-
-                        $baseMessage = $ownerName
-                            ? "Hello {$ownerName}, your vehicle ({$plate}) has been checked out from parking{$placeText}."
-                            : "Your vehicle ({$plate}) has been checked out from parking{$placeText}.";
-
-                        $message = $checkoutAt
-                            ? "{$baseMessage} Checkout time: {$checkoutAt}."
-                            : $baseMessage;
+                        $payment = \App\Models\Payment::where('vehicle_id', $record->id)
+                            ->orderByDesc('id')
+                            ->first();
+                        $message = \App\Services\SmsTemplateService::formatCheckout($record, $payment);
 
                         $sender = new class {
                             use \App\Traits\SendsSms;
@@ -217,8 +206,9 @@ class VehicleResource extends Resource
 
                         $sender->sendNow((string) ($record->owner_phone ?? ''), $message);
 
+                        $plateText = (string) ($record->plate_number ?? 'Vehicle');
                         Notification::make()
-                            ->title("{$plate} has been marked as checked out.")
+                            ->title("{$plateText} has been marked as checked out.")
                             ->seconds(5)
                             ->success()
                             ->send();

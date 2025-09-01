@@ -134,33 +134,8 @@ class PaymentResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        $user = User::find(auth()->id());
-        $base = parent::getEloquentQuery()->with(['vehicle.place', 'vehicle.creator']);
-
-        if ($user && $user->hasRole('super_admin')) {
-            return $base;
-        }
-
-        if ($user && $user->hasRole('agent')) {
-            return $base->whereHas('vehicle', function ($q) use ($user) {
-                $q->where('created_by', $user->id);
-            });
-        }
-
-        // Owner: show payments for places they own
-        return $base->whereHas('vehicle.place', function ($q) use ($user) {
-            $q->where('owner_id', $user?->id);
-        });
-    }
-
     public static function shouldRegisterNavigation(): bool
     {
-        // $user = auth()->user();
-        // if (! $user) return false;
-        // return $user->hasRole('super_admin') || $user->hasRole('owner');
-
         return true;
     }
 }

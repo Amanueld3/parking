@@ -22,4 +22,34 @@ class Payment extends Model
     {
         return $this->belongsTo(Vehicle::class);
     }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Payment $payment) {
+            if (empty($payment->ticket_no)) {
+                $payment->ticket_no = self::generateTicketNo();
+            }
+        });
+    }
+
+    /**
+     * Generate an incremental, unique ticket number in the form QPT########
+     */
+    public static function generateTicketNo(): string
+    {
+        $prefix = 'QPT';
+        // Use the next integer based on current max id-like sequence in ticket_no
+        $last = static::query()
+            ->select('ticket_no')
+            ->where('ticket_no', 'like', $prefix . '%')
+            ->orderByDesc('ticket_no')
+            ->first();
+
+        $next = 1;
+        if ($last && preg_match('/^' . $prefix . '(\d{8})$/', $last->ticket_no, $m)) {
+            $next = (int) $m[1] + 1;
+        }
+
+        return sprintf('%s%08d', $prefix, $next);
+    }
 }

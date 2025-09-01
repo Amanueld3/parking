@@ -51,23 +51,8 @@ class CreateVehicle extends CreateRecord
         $record->checkin_time = now();
         $record->save();
 
-        // Format check-in time using app timezone
-        $checkinAt = $record->checkin_time
-            ? $record->checkin_time->format('Y-m-d h:i A')
-            : null;
-
-        // Build message
-        $placeText = $record->place?->name ? " at {$record->place->name}" : '';
-        $ownerName = trim($record->owner_name ?? '');
-        $plate = (string) ($record->plate_number ?? '');
-
-        $baseMessage = $ownerName
-            ? "Hello {$ownerName}, your vehicle ({$plate}) has been checked in to parking{$placeText}."
-            : "Your vehicle ({$plate}) has been checked in to parking{$placeText}.";
-
-        $message = $checkinAt
-            ? "{$baseMessage} Check-in time: {$checkinAt}."
-            : $baseMessage;
+        // Build standardized check-in SMS
+        $message = \App\Services\SmsTemplateService::formatCheckin($record);
 
         // Send SMS using trait
         $sender = new class {
@@ -81,6 +66,7 @@ class CreateVehicle extends CreateRecord
         $sender->sendNow((string) ($record->owner_phone ?? ''), $message);
 
         // Filament notification
+        $plate = (string) ($record->plate_number ?? 'Vehicle');
         Notification::make()
             ->title("{$plate} has been marked as checked in.")
             ->seconds(5)

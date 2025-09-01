@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('vehicle_id')->constrained('vehicles')->cascadeOnDelete();
+            $table->string('ticket_no', 16)->unique();
             $table->string('tx_ref')->unique();
             $table->string('provider')->default('chapa');
             $table->string('status')->default('initialized'); // initialized|pending|success|failed|cancelled

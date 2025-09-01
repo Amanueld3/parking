@@ -9,6 +9,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -18,8 +19,16 @@ class PaymentController extends Controller
             return back()->with('error', 'This vehicle is already checked out.');
         }
 
-        // In a real app determine amount from pricing policy; placeholder 10 ETB
-        $amount = (float) ($request->input('amount', 10));
+        // Compute amount: 20 ETB per 30 minutes, minimum 20 ETB
+        $blockMinutes = (int) config('parking.block_minutes', 30);
+        $ratePerBlock = (float) config('parking.rate_per_30_min', 20);
+        $minCharge = (float) config('parking.min_charge', 20);
+
+        $now = Carbon::now();
+        $checkIn = $vehicle->checkin_time ? Carbon::parse($vehicle->checkin_time) : null;
+        $minutes = $checkIn ? max(0, $checkIn->diffInMinutes($now)) : 0;
+        $blocks = max(1, (int) ceil($minutes / max(1, $blockMinutes)));
+        $amount = max($minCharge, $blocks * $ratePerBlock);
 
         // Basic config checks
         if (empty(config('services.chapa.secret'))) {
@@ -150,21 +159,12 @@ class PaymentController extends Controller
 
     private function checkoutNotification($record)
     {
-        $checkoutAt = $record->checkout_time
-            ? $record->checkout_time->format('Y-m-d h:i A')
-            : null;
+        // Find related payment (if any) to enrich SMS with ticket and amount
+        $payment = Payment::where('vehicle_id', $record->id)
+            ->orderByDesc('id')
+            ->first();
 
-        $placeText = $record->place?->name ? " at {$record->place->name}" : '';
-        $ownerName = trim($record->owner_name ?? '');
-        $plate = (string) ($record->plate_number ?? '');
-
-        $baseMessage = $ownerName
-            ? "Hello {$ownerName}, your vehicle ({$plate}) has been checked out from parking{$placeText}."
-            : "Your vehicle ({$plate}) has been checked out from parking{$placeText}.";
-
-        $message = $checkoutAt
-            ? "{$baseMessage} Checkout time: {$checkoutAt}."
-            : $baseMessage;
+        $message = \App\Services\SmsTemplateService::formatCheckout($record, $payment);
 
         $sender = new class {
             use \App\Traits\SendsSms;
@@ -176,8 +176,9 @@ class PaymentController extends Controller
 
         $sender->sendNow((string) ($record->owner_phone ?? ''), $message);
 
+        $plateText = (string) ($record->plate_number ?? 'Vehicle');
         Notification::make()
-            ->title("{$plate} has been marked as checked out.")
+            ->title("{$plateText} has been marked as checked out.")
             ->seconds(5)
             ->success()
             ->send();

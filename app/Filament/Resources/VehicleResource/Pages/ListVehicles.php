@@ -29,20 +29,7 @@ class ListVehicles extends ListRecords
                         }
 
                         $ownerPhone = (string) ($record->owner_phone ?? '');
-                        $plate = (string) ($record->plate_number ?? '');
-                        $ownerName = trim((string) ($record->owner_name ?? ''));
-
-                        $tz = (string) Config::get('app.timezone', 'UTC');
-                        $checkinAt = $record->checkin_time ?? $record->created_at;
-                        $timeText = optional($checkinAt)->setTimezone($tz)?->format('Y-m-d H:i');
-
-                        $placeName = $record->place?->name;
-                        $placeText = $placeName ? " at {$placeName}" : '';
-                        $base = $ownerName !== ''
-                            ? "Hello {$ownerName}, your vehicle ({$plate}) has been registered for parking{$placeText}."
-                            : "Your vehicle ({$plate}) has been registered for parking{$placeText}.";
-                        $message = $timeText ? ($base . " Checkin time: {$timeText}.") : $base;
-
+                        $message = \App\Services\SmsTemplateService::formatCheckin($record);
                         $this->sendSms($ownerPhone, $message);
                     } catch (\Throwable $e) {
                         return; // silent

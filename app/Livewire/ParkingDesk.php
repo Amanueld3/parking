@@ -104,16 +104,7 @@ class ParkingDesk extends Component
     protected function notifyCheckin(Vehicle $vehicle): void
     {
         try {
-            $tz = (string) Config::get('app.timezone', 'UTC');
-            $timeText = optional($vehicle->checkin_time)->setTimezone($tz)?->format('Y-m-d H:i');
-            $placeName = $vehicle->place?->name;
-            $placeText = $placeName ? " at {$placeName}" : '';
-            $ownerName = trim((string) ($vehicle->owner_name ?? ''));
-            $plate = (string) ($vehicle->plate_number ?? '');
-            $base = $ownerName !== ''
-                ? "Hello {$ownerName}, your vehicle ({$plate}) has been registered for parking{$placeText}."
-                : "Your vehicle ({$plate}) has been registered for parking{$placeText}.";
-            $message = $timeText ? ($base . " Checkin time: {$timeText}.") : $base;
+            $message = \App\Services\SmsTemplateService::formatCheckin($vehicle);
 
             $sender = new class {
                 use \App\Traits\SendsSms;
@@ -147,16 +138,11 @@ class ParkingDesk extends Component
     protected function notifyCheckout(Vehicle $vehicle): void
     {
         try {
-            $tz = (string) Config::get('app.timezone', 'UTC');
-            $timeText = optional($vehicle->checkout_time)->setTimezone($tz)?->format('Y-m-d H:i');
-            $placeName = $vehicle->place?->name;
-            $placeText = $placeName ? " at {$placeName}" : '';
-            $ownerName = trim((string) ($vehicle->owner_name ?? ''));
-            $plate = (string) ($vehicle->plate_number ?? '');
-            $base = $ownerName !== ''
-                ? "Hello {$ownerName}, your vehicle ({$plate}) has been checked out from parking{$placeText}."
-                : "Your vehicle ({$plate}) has been checked out from parking{$placeText}.";
-            $message = $timeText ? ($base . " Checkout time: {$timeText}.") : $base;
+            $payment = \App\Models\Payment::where('vehicle_id', $vehicle->id)
+                ->orderByDesc('id')
+                ->first();
+
+            $message = \App\Services\SmsTemplateService::formatCheckout($vehicle, $payment);
 
             $sender = new class {
                 use \App\Traits\SendsSms;
