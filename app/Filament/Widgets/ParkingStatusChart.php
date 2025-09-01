@@ -11,6 +11,12 @@ class ParkingStatusChart extends ChartWidget
     protected static ?int $sort = 3;
     protected static ?string $maxHeight = '250px';
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+        return $user ? $user->can('widget_ParkingStatusChart') : false;
+    }
+
     protected function getData(): array
     {
         $currentlyParked = Vehicle::whereNull('checkout_time')->count();

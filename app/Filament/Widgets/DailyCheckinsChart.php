@@ -11,6 +11,12 @@ class DailyCheckinsChart extends ChartWidget
     protected static ?string $heading = 'Daily Vehicle Check-ins';
     protected static ?int $sort = 2;
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+        return $user ? $user->can('widget_DailyCheckinsChart') : false;
+    }
+
     protected function getData(): array
     {
         $data = Vehicle::select(

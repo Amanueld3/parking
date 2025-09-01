@@ -44,15 +44,19 @@ class RoleSeeder extends Seeder
         $Admin->permissions()->detach();
         $AdminPermissions = [];
         foreach ($permissionPrefixes as $prefix) {
-            if (Permission::where('name', "{$prefix}role")->exists()) {
-                $AdminPermissions[] = "{$prefix}role";
-            }
+            // if (Permission::where('name', "{$prefix}role")->exists()) {
+            //     $AdminPermissions[] = "{$prefix}role";
+            // }
             $AdminPermissions[] = "{$prefix}owner";
             $AdminPermissions[] = "{$prefix}place";
             $AdminPermissions[] = "{$prefix}slot";
             $AdminPermissions[] = "{$prefix}agent";
             $AdminPermissions[] = "{$prefix}user";
             $AdminPermissions[] = "{$prefix}vehicle";
+            // Widgets for dashboard visibility
+            $AdminPermissions[] = 'widget_VehicleStatsOverview';
+            $AdminPermissions[] = 'widget_DailyCheckinsChart';
+            $AdminPermissions[] = 'widget_ParkingStatusChart';
         }
         $AdminPermissions[] = 'view_payment';
         $AdminPermissions[] = 'view_any_payment';

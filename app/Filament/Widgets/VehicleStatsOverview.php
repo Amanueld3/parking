@@ -15,6 +15,12 @@ class VehicleStatsOverview extends BaseWidget
     protected static ?int $sort = 1;
     protected static ?string $maxHeight = '250px';
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+        return $user ? $user->can('widget_VehicleStatsOverview') : false;
+    }
+
     protected function getStats(): array
     {
         $today = now()->startOfDay();
