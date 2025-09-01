@@ -28,8 +28,6 @@ class PlaceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
     protected static ?string $modelLabel = 'Place';
 
-    // protected static ?string $navigationGroup = 'Setups';
-
     public static function form(Form $form): Form
     {
         return $form
@@ -197,13 +195,14 @@ class PlaceResource extends Resource
                         Forms\Components\TextInput::make('owner_email')
                             ->label('Email')
                             ->email()
+                            ->nullable()
                             ->rules([
                                 function ($record) {
                                     return Rule::unique('users', 'email')
                                         ->whereNot('id', $record?->owner?->id);
                                 }
                             ])
-                            ->required(),
+                            ->required(false),
 
                         Forms\Components\Hidden::make('owner_password')
                             ->default('password1234')
@@ -227,19 +226,6 @@ class PlaceResource extends Resource
                     ->label('Slots')
                     ->counts('slots')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('owner.name')
-                    ->label('Owner Name')
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('owner.email')
-                    ->label('Owner Email')
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('owner.phone')
-                    ->label('Owner Phone')
-                    ->formatStateUsing(fn($state) => $state ? '+251' . $state : '-')
-                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('address')
                     ->formatStateUsing(fn($state) => $state ? json_encode($state) : '-')
@@ -276,7 +262,7 @@ class PlaceResource extends Resource
     {
         return [
             AgentsRelationManager::class,
-            SlotsRelationManager::class,
+            // SlotsRelationManager::class,
         ];
     }
 
@@ -322,17 +308,5 @@ class PlaceResource extends Resource
                     ])
                     ->columns(2),
             ]);
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        $user = User::find(auth()->id());
-
-        if ($user->hasRole('super_admin')) {
-            return parent::getEloquentQuery();
-        } else {
-            return parent::getEloquentQuery()
-                ->where('owner_id', $user->id);
-        }
     }
 }

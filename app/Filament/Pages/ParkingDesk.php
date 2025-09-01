@@ -15,8 +15,14 @@ class ParkingDesk extends Page
 
     protected static string $view = 'filament.pages.parking-desk';
 
-    // public static function shouldRegisterNavigation(): bool
-    // {
-    //     return Auth::user()->can('widget_AgentShortcutNavigation');
-    // }
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+        return $user ? $user->can('page_ParkingDesk') : false;
+    }
+
+    public function mount(): void
+    {
+        abort_unless(auth()->user()?->can('page_ParkingDesk'), 403);
+    }
 }

@@ -60,8 +60,8 @@ class AgentsRelationManager extends RelationManager
                         Forms\Components\TextInput::make('email')
                             ->label('Email')
                             ->email()
-                            ->unique(table: 'users', column: 'email', ignoreRecord: true)
-                            ->required(),
+                            ->nullable()
+                            ->unique(table: 'users', column: 'email', ignoreRecord: true),
                         Forms\Components\Hidden::make('password')
                             ->default('password1234')
                             ->dehydrateStateUsing(fn($state) => Hash::make($state)),
@@ -96,7 +96,7 @@ class AgentsRelationManager extends RelationManager
                     ->using(function (array $data, string $model): Model {
                         $user = User::create([
                             'name' => $data['name'],
-                            'email' => $data['email'],
+                            'email' => $data['email'] ?? null,
                             'phone' => $data['phone'],
                             'password' => $data['password'],
                         ]);
@@ -107,6 +107,7 @@ class AgentsRelationManager extends RelationManager
                             'place_id' => $this->getOwnerRecord()->id,
                             'user_id' => $user->id,
                             'created_by' => auth()->id(),
+                            'status' => 1,
                         ]);
                     }),
             ])
@@ -132,7 +133,7 @@ class AgentsRelationManager extends RelationManager
                                 Forms\Components\TextInput::make('user.email')
                                     ->label('Email')
                                     ->email()
-                                    ->required(),
+                                    ->nullable(),
                                 Forms\Components\TextInput::make('user.phone')
                                     ->label('Phone')
                                     ->required(),
@@ -162,7 +163,7 @@ class AgentsRelationManager extends RelationManager
                     ->using(function (Model $record, array $data): Model {
                         $record->user->update([
                             'name' => $data['user']['name'],
-                            'email' => $data['user']['email'],
+                            'email' => $data['user']['email'] ?? null,
                             'phone' => $data['user']['phone'],
                         ]);
 

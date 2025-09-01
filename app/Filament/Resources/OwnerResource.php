@@ -83,13 +83,14 @@ class OwnerResource extends Resource
                 Forms\Components\TextInput::make('email')
                     ->label('Email')
                     ->email()
+                    ->nullable()
                     ->rules([
                         function ($record) {
                             return Rule::unique('users', 'email')
                                 ->whereNot('id', $record?->id);
                         }
                     ])
-                    ->required(),
+                    ->required(false),
 
                 Forms\Components\Hidden::make('password')
                     ->default('password1234')
@@ -140,6 +141,12 @@ class OwnerResource extends Resource
             PlacesRelationManager::class,
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
 
     public static function getPages(): array
     {

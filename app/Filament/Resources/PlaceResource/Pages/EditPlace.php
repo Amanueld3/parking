@@ -39,7 +39,7 @@ class EditPlace extends EditRecord
             $this->record->owner->update([
                 'name' => $data['owner_name'],
                 'phone' => $data['owner_phone'],
-                'email' => $data['owner_email'],
+                'email' => $data['owner_email'] ?? null,
                 'password' => !empty($data['owner_password'])
                     ? bcrypt($data['owner_password'])
                     : $this->record->owner->password,

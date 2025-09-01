@@ -12,7 +12,9 @@ class Agent extends Model
     use HasUuids, SoftDeletes;
 
     protected $guarded = [];
-    protected $casts = [];
+    protected $casts = [
+        'status' => 'integer',
+    ];
 
     /**
      * Get the place that owns the Slot
@@ -42,6 +44,9 @@ class Agent extends Model
         static::creating(function ($model) {
             if (empty($model->created_by) && auth()->check()) {
                 $model->created_by = auth()->id();
+            }
+            if ($model->status === null) {
+                $model->status = 1; // Active by default
             }
         });
     }

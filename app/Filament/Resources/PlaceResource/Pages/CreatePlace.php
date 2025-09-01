@@ -21,7 +21,7 @@ class CreatePlace extends CreateRecord
         $user = User::create([
             'name' => $data['owner_name'],
             'phone' => $data['owner_phone'],
-            'email' => $data['owner_email'],
+            'email' => $data['owner_email'] ?? null,
             'password' => bcrypt($data['owner_password']),
         ]);
 

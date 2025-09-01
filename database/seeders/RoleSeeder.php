@@ -35,11 +35,28 @@ class RoleSeeder extends Seeder
             if (Permission::where('name', "{$prefix}role")->exists()) {
                 $superAdminPermissions[] = "{$prefix}role";
             }
-            $superAdminPermissions[] = "{$prefix}owner";
-            $superAdminPermissions[] = "{$prefix}place";
-            $superAdminPermissions[] = "{$prefix}slot";
+            $superAdminPermissions[] = "{$prefix}user";
         }
         $superAdmin->givePermissionTo($superAdminPermissions);
+
+
+        $Admin = Role::firstOrCreate(['name' => 'admin']);
+        $Admin->permissions()->detach();
+        $AdminPermissions = [];
+        foreach ($permissionPrefixes as $prefix) {
+            if (Permission::where('name', "{$prefix}role")->exists()) {
+                $AdminPermissions[] = "{$prefix}role";
+            }
+            $AdminPermissions[] = "{$prefix}owner";
+            $AdminPermissions[] = "{$prefix}place";
+            $AdminPermissions[] = "{$prefix}slot";
+            $AdminPermissions[] = "{$prefix}agent";
+            $AdminPermissions[] = "{$prefix}user";
+            $AdminPermissions[] = "{$prefix}vehicle";
+        }
+        $AdminPermissions[] = 'view_payment';
+        $AdminPermissions[] = 'view_any_payment';
+        $Admin->givePermissionTo($AdminPermissions);
 
 
         $owner = Role::firstOrCreate(['name' => 'owner']);
@@ -54,16 +71,12 @@ class RoleSeeder extends Seeder
         $agent = Role::firstOrCreate(['name' => 'agent']);
         $agent->permissions()->detach();
         $agentPermissions = [];
-        // foreach ($permissionPrefixes as $prefix) {
-        //     $agentPermissions[] = "{$prefix}place";
-        //     $agentPermissions[] = "{$prefix}slot";
-        // }s
-        // $agentPermissions[] = 'page_CheckoutParking';
-        // $agentPermissions[] = 'page_ParkingDesk';
+        $agentPermissions[] = 'page_CheckoutParking';
+        $agentPermissions[] = 'page_ParkingDesk';
+        $agentPermissions[] = 'widget_AgentShortcutNavigation';
         $agentPermissions[] = 'create_vehicle';
         $agentPermissions[] = 'view_any_vehicle';
-        // $agentPermissions[] = 'view_payment';
-        // $agentPermissions[] = 'view_any_payment';
+
         $agent->givePermissionTo($agentPermissions);
     }
 }

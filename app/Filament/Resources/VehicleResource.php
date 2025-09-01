@@ -167,12 +167,6 @@ class VehicleResource extends Resource
                     })
                     ->formatStateUsing(fn($state) => "<strong>{$state}</strong>")
                     ->html(),
-                Tables\Columns\TextColumn::make('owner_name')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('owner_phone')
-                    ->searchable()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('place.name')
                     ->label('Place')
                     ->searchable()
