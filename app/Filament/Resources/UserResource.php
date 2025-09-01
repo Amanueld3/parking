@@ -64,7 +64,7 @@ class UserResource extends Resource
 
                 Forms\Components\Select::make('roles')
                     ->label('Roles')
-                    ->relationship('roles', 'name')
+                    ->relationship('roles', 'name', fn(Builder $query) => $query->where('name', '!=', 'super_admin'))
                     ->multiple()
                     ->preload(),
 
@@ -94,7 +94,7 @@ class UserResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('roles')
                     ->label('Role')
-                    ->relationship('roles', 'name')
+                    ->relationship('roles', 'name', fn(Builder $query) => $query->where('name', '!=', 'super_admin'))
                     ->multiple()
                     ->preload(),
             ])
@@ -121,5 +121,11 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereDoesntHave('roles', fn($q) => $q->where('name', 'super_admin'));
     }
 }
