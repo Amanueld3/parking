@@ -25,8 +25,38 @@
                             });
                         } catch (e) {}
                     }
+
+                    // Web Push subscription
+                    try {
+                        const vapidKey = @json(config('services.webpush.vapid_public_key'));
+                        if (vapidKey) {
+                            const sub = await reg.pushManager.getSubscription() || await reg.pushManager
+                                .subscribe({
+                                    userVisibleOnly: true,
+                                    applicationServerKey: urlBase64ToUint8Array(vapidKey),
+                                });
+                            await fetch('/push/subscribe', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').content,
+                                },
+                                body: JSON.stringify(sub),
+                            });
+                        }
+                    } catch (_) {}
                 }).catch(() => {});
             });
+        }
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+            return outputArray;
         }
     </script>
     <meta name="theme-color" content="#4CAF50">

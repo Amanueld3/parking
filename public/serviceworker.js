@@ -1,4 +1,4 @@
-const cacheName = "filament-pwa-cache-v1";
+const cacheName = "filament-pwa-cache-v2";
 const urlsToCache = [
     "/",
     "/offline.html",
@@ -20,6 +20,29 @@ self.addEventListener("fetch", (e) => {
         );
         return;
     }
+    // Queue failed mutating requests for background sync
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(e.request.method)) {
+        e.respondWith(
+            fetch(e.request.clone()).catch(async () => {
+                const cloned = e.request.clone();
+                const body = await cloned.text();
+                await queueRequest({
+                    url: e.request.url,
+                    method: e.request.method,
+                    headers: Object.fromEntries([
+                        ...e.request.headers.entries(),
+                    ]),
+                    body,
+                    timestamp: Date.now(),
+                });
+                return new Response(JSON.stringify({ queued: true }), {
+                    status: 202,
+                    headers: { "Content-Type": "application/json" },
+                });
+            })
+        );
+        return;
+    }
     e.respondWith(
         caches.match(e.request).then((res) => res || fetch(e.request))
     );
@@ -28,10 +51,7 @@ self.addEventListener("fetch", (e) => {
 // Background Sync (one-off)
 self.addEventListener("sync", (event) => {
     if (event.tag === "sync-content") {
-        event.waitUntil(
-            // Placeholder: implement background sync logic, e.g., retry queued POSTs
-            Promise.resolve()
-        );
+        event.waitUntil(flushQueue());
     }
 });
 
@@ -39,8 +59,13 @@ self.addEventListener("sync", (event) => {
 self.addEventListener("periodicsync", (event) => {
     if (event.tag === "periodic-sync-content") {
         event.waitUntil(
-            // Placeholder: refresh cached content periodically
-            caches.open(cacheName).then((cache) => cache.addAll(urlsToCache))
+            caches.open(cacheName).then(async (cache) => {
+                for (const url of urlsToCache) {
+                    try {
+                        await cache.add(new Request(url, { cache: "reload" }));
+                    } catch (_) {}
+                }
+            })
         );
     }
 });
@@ -57,3 +82,56 @@ self.addEventListener("push", (event) => {
         })
     );
 });
+
+// IndexedDB-based request queue for Background Sync
+const DB_NAME = "bg-sync-db";
+const STORE = "requests";
+
+function openDb() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => {
+            req.result.createObjectStore(STORE, {
+                keyPath: "id",
+                autoIncrement: true,
+            });
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+    });
+}
+
+async function queueRequest(item) {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, "readwrite");
+        tx.objectStore(STORE).add(item);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+async function flushQueue() {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, "readwrite");
+        const store = tx.objectStore(STORE);
+        const cursorReq = store.openCursor();
+        cursorReq.onsuccess = async (e) => {
+            const cursor = e.target.result;
+            if (!cursor) return;
+            const r = cursor.value;
+            try {
+                await fetch(r.url, {
+                    method: r.method,
+                    headers: r.headers,
+                    body: r.body,
+                });
+                store.delete(cursor.key);
+            } catch (_) {}
+            cursor.continue();
+        };
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}

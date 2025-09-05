@@ -58,3 +58,10 @@ Route::get('/protocol', function (\Illuminate\Http\Request $request) {
 });
 
 Route::view('/widgets/status', 'widgets.status');
+
+// Push subscription endpoint (replace storage with DB later)
+Route::post('/push/subscribe', function (\Illuminate\Http\Request $request) {
+    $sub = $request->all();
+    session(['push.subscription' => $sub]);
+    return response()->json(['ok' => true]);
+});
