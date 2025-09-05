@@ -7,6 +7,28 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('{{ asset('serviceworker.js') }}').then(async (reg) => {
+                    // Background sync
+                    if ('sync' in reg) {
+                        try {
+                            await reg.sync.register('sync-content');
+                        } catch (e) {}
+                    }
+                    // Periodic background sync
+                    if ('periodicSync' in reg) {
+                        try {
+                            await reg.periodicSync.register('periodic-sync-content', {
+                                minInterval: 24 * 60 * 60 * 1000
+                            });
+                        } catch (e) {}
+                    }
+                }).catch(() => {});
+            });
+        }
+    </script>
     <meta name="theme-color" content="#4CAF50">
     <link rel="apple-touch-icon" href="{{ asset('images/icons/icon-152x152.png') }}">
 
