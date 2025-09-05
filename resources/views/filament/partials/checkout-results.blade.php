@@ -22,8 +22,8 @@
     <div class="space-y-3">
         @foreach ($rows as $v)
             <div class="p-3 bg-white border border-gray-200 rounded-lg dark:border-gray-700 dark:bg-gray-900">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="flex items-start gap-3">
+                <div class="flex flex-col items-start gap-3">
+                    <div class="flex items-start w-full gap-3">
                         <div
                             class="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-sm font-semibold font-mono tracking-wider text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                             {{ strtoupper($v->plate_number) }}
@@ -63,15 +63,17 @@
                             </div>
                         </div>
                     </div>
-                    <div class="shrink-0">
+                    <div class="w-full mt-3 shrink-0">
                         <form method="POST" action="{{ route('payments.start', ['vehicle' => $v->id]) }}">
                             @csrf
                             <input type="hidden" name="amount" value="10" />
                             <button type="submit"
-                                class="fi-btn relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm outline-none ring-1 ring-primary-600/20 transition hover:bg-primary-500 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-primary-600 dark:hover:bg-primary-500">
-                                <x-heroicon-o-credit-card class="w-4 h-4" />
+                                class="fi-btn relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm outline-none ring-1 ring-primary-600/20 transition hover:bg-primary-500 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-primary-600 dark:hover:bg-primary-500
+           w-full lg:py-1.5 lg:text-xs">
+                                <x-heroicon-o-credit-card class="w-4 h-4 lg:w-3 lg:h-3" />
                                 <span>Pay & Checkout</span>
                             </button>
+
                         </form>
                     </div>
                 </div>

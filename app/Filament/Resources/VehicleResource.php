@@ -227,6 +227,13 @@ class VehicleResource extends Resource
             ]);
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        // return false;
+        $user = auth()->user();
+        return $user ? $user->can('view_vehicle') : false;
+    }
+
     public static function getRelations(): array
     {
         return [
