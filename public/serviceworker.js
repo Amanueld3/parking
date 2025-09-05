@@ -1,11 +1,10 @@
 const cacheName = "filament-pwa-cache-v1";
 const urlsToCache = [
     "/",
+    "/offline.html",
     "/admin",
     "/css/app.css",
     "/js/app.js",
-    "/vendor/filament/**/*.css",
-    "/vendor/filament/**/*.js",
 ];
 
 self.addEventListener("install", (e) => {
@@ -15,8 +14,14 @@ self.addEventListener("install", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
+    if (e.request.mode === "navigate") {
+        e.respondWith(
+            fetch(e.request).catch(() => caches.match("/offline.html"))
+        );
+        return;
+    }
     e.respondWith(
-        caches.match(e.request).then((response) => response || fetch(e.request))
+        caches.match(e.request).then((res) => res || fetch(e.request))
     );
 });
 

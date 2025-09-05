@@ -40,3 +40,21 @@ Route::middleware([
 Route::get('/test-pwa', function () {
     return view('test-pwa');
 });
+
+// PWA advanced handlers
+Route::post('/share/receive', function (\Illuminate\Http\Request $request) {
+    // TODO: handle shared content, files, etc.
+    return response()->json(['ok' => true]);
+});
+
+Route::get('/files/open', function (\Illuminate\Http\Request $request) {
+    // TODO: open file logic based on query params
+    return response('File handler invoked');
+});
+
+Route::get('/protocol', function (\Illuminate\Http\Request $request) {
+    // TODO: handle custom protocol url param
+    return response('Protocol handler: ' . $request->query('url'));
+});
+
+Route::view('/widgets/status', 'widgets.status');

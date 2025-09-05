@@ -39,6 +39,81 @@
             "origin": "http://parking.test/"
         }
     ],
+    "display_override": [
+        "window-controls-overlay",
+        "standalone"
+    ],
+    "handle_links": "preferred",
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "file_handlers": [
+        {
+            "action": "/files/open",
+            "accept": {
+                "text/csv": [
+                    ".csv"
+                ],
+                "application/json": [
+                    ".json"
+                ]
+            }
+        }
+    ],
+    "protocol_handlers": [
+        {
+            "protocol": "web+parking",
+            "url": "/protocol?url=%s"
+        }
+    ],
+    "share_target": {
+        "action": "/share/receive",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url",
+            "files": [
+                {
+                    "name": "files",
+                    "accept": [
+                        "image/*",
+                        "text/*",
+                        "application/json"
+                    ]
+                }
+            ]
+        }
+    },
+    "shortcuts": [
+        {
+            "name": "Open Admin",
+            "short_name": "Admin",
+            "description": "Go to admin dashboard",
+            "url": "/admin",
+            "icons": [
+                {
+                    "src": "/logo.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Check-ins",
+            "short_name": "Check-ins",
+            "description": "Recent check-ins",
+            "url": "/admin"
+        }
+    ],
+    "widgets": [
+        {
+            "name": "Parking Status",
+            "short_name": "Status",
+            "description": "Quick view of parking occupancy",
+            "url": "/widgets/status"
+        }
+    ],
     "start_url": "/",
     "icons": [
         {
