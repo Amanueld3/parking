@@ -1,11 +1,11 @@
 {
     "name": "Laravel PWA",
     "short_name": "LPT",
-    "start_url": "/",
-    "background_color": "#000000",
-    "description": "A Progressive Web Application setup for Laravel projects.",
+    "background_color": "#6777ef",
     "display": "fullscreen",
-    "theme_color": "#000000",
+    "description": "A Progressive Web Application setup for Laravel projects.",
+    "theme_color": "#6777ef",
+    "start_url": "/",
     "icons": [
         {
             "src": "logo.png",

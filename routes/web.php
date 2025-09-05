@@ -36,3 +36,7 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 });
+
+Route::get('/test-pwa', function () {
+    return view('test-pwa');
+});

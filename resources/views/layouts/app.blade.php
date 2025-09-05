@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="apple-touch-icon" href="{{ asset('images/icons/icon-152x152.png') }}">
+
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Fonts -->
@@ -18,6 +22,7 @@
     <!-- Styles -->
     @livewireStyles
     @PwaHead
+
 
 </head>
 
